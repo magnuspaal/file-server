@@ -1,0 +1,7 @@
+server:
+  port: 8082
+app:
+  url: http://localhost:8082
+  upload-dir: ./media
+  media-path: /media/**
+  media-mapping: ${MEDIA_MAPPING}
