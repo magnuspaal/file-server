@@ -60,4 +60,9 @@ public class FileStorageService {
       throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
     }
   }
+
+  public void deleteFile(String fileName) throws IOException {
+    Path targetLocation = this.fileStorageLocation.resolve(fileName);
+    Files.delete(targetLocation);
+  }
 }
