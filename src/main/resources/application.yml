@@ -1,5 +1,10 @@
 server:
   port: 8082
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
 app:
   url: http://localhost:8082
   upload-dir: ./media

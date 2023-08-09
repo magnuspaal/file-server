@@ -19,7 +19,7 @@ public class FileUploadController {
 
   @PostMapping("/upload")
   public ResponseEntity<UploadResponse> uploadFile(
-      @RequestParam(name = "file", required = true) MultipartFile file
+      @RequestParam(name = "file") MultipartFile file
   ) {
     String fileName = fileStorageService.storeFile(file);
 
