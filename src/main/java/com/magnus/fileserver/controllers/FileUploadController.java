@@ -11,8 +11,8 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1")
 public class FileUploadController {
-  private final FileStorageService fileStorageService;
 
+  private final FileStorageService fileStorageService;
   public FileUploadController(FileStorageService fileStorageService) {
     this.fileStorageService = fileStorageService;
   }
