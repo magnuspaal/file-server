@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -57,12 +56,19 @@ public class FileStorageService {
         inputImage = Scalr.rotate(inputImage, rotation, Scalr.OP_ANTIALIAS);
       }
 
-      inputImage = Scalr.resize(inputImage, Scalr.Mode.FIT_TO_WIDTH, 558);
+      BufferedImage extraSmallImage = Scalr.resize(inputImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 100);
+      BufferedImage smallImage = Scalr.resize(inputImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 250);
+      BufferedImage mediumImage = Scalr.resize(inputImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 558);
+      BufferedImage largeImage = Scalr.resize(inputImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 1000);
+
+      int ratio = Math.round((float) inputImage.getWidth() / inputImage.getHeight() * 100000);
 
       // Normalize file name
-      String namePrefix = RandomStringGenerator.getRandomString() + "-" + new Date().getTime() + "-" + inputImage.getWidth() + "_" + inputImage.getHeight();
-
+      String namePrefix = RandomStringGenerator.getRandomString() + "-" + ratio;
       String fileName = namePrefix + "." + FileUtils.getFileExtension(file.getOriginalFilename());
+      String extraSmallFileName = "xs/" + fileName;
+      String smallFileName = "sm/" + fileName;
+      String largeImageFileName = "lg/" + fileName;
 
       // Check if the filename contains invalid characters
       if (fileName.contains("..")) {
@@ -70,7 +76,10 @@ public class FileStorageService {
             "Sorry! Filename contains invalid path sequence " + fileName);
       }
 
-      this.uploadImage(inputImage, fileName);
+      this.uploadImage(extraSmallImage, extraSmallFileName);
+      this.uploadImage(smallImage, smallFileName);
+      this.uploadImage(mediumImage, fileName);
+      this.uploadImage(largeImage, largeImageFileName);
 
       return fileName;
     } catch (IOException ex) {
@@ -103,12 +112,17 @@ public class FileStorageService {
 
   private Scalr.Rotation getImageRotation(MultipartFile file) throws IOException, ImageProcessingException {
     Metadata metadata = ImageMetadataReader.readMetadata(file.getInputStream());
-    ExifIFD0Directory exifIFD0 = metadata.getDirectory(ExifIFD0Directory.class);
+
 
     int orientation;
 
     try {
-      orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+      ExifIFD0Directory exifIFD0 = metadata.getDirectory(ExifIFD0Directory.class);
+      if (exifIFD0 != null) {
+        orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+      } else {
+        return null;
+      }
     } catch (MetadataException exception) {
       return null;
     }
