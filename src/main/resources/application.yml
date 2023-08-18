@@ -1,12 +1,14 @@
 server:
-  port: 8082
+  port: ${PORT}
 spring:
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 10MB
 app:
-  url: http://localhost:8082
+  api-key: ${API_KEY}
   upload-dir: ./media
   media-path: /media/**
   media-mapping: ${MEDIA_MAPPING}
+  jwt-secret: ${JWT_SECRET}
+  allowed-origins: ${ALLOWED_ORIGINS}
