@@ -1,6 +1,6 @@
 services:
   file-server:
-    image: registry.digitalocean.com/magnus-images/file-server:0.1.0
+    image: registry.digitalocean.com/magnus-images/file-server:0.1.1
     env_file: '.env'
     container_name: file-server
     networks:
