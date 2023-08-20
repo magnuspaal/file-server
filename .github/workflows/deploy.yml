@@ -1,0 +1,52 @@
+name: Deploy Social Backend
+on:
+  push:
+    tags:
+      - '*.*.*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./cicd/deploy/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_REGISTRY_PATH }}/${{ secrets.APP_NAME }}:${{ env.RELEASE_VERSION }}
+          provenance: false
+          build-args: APP_VERSION=${{ env.RELEASE_VERSION }}
+      - name: Copy new docker-compose.yml
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          strip_components: 2
+          source: cicd/deploy/docker-compose.yml
+          target: /app/${{ secrets.APP_NAME }}
+      - name: Run container
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /app/${{ secrets.APP_NAME }}
+            docker compose down
+            docker compose pull 
+            docker compose up -d
