@@ -19,6 +19,6 @@ public class RandomStringGenerator {
     }
     String string = sb.toString();
     sb.setLength(0);
-    return string;
+    return string.replace("\0", "");
   }
 }
