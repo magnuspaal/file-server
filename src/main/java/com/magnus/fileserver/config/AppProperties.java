@@ -12,8 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 public class AppProperties {
-  private String apiKey;
-  private String uploadUrl;
+  private String uploadDir;
   private String mediaPath;
   private String mediaMapping;
   private String jwtSecret;

@@ -4,7 +4,6 @@ import com.magnus.fileserver.config.AppProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,37 +23,19 @@ import java.util.List;
 public class SecurityConfiguration {
 
   private final AppProperties appProperties;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @Bean
-  @Order(1)
   public SecurityFilterChain apiKeyFilterChain(HttpSecurity http) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
         .cors(Customizer.withDefaults())
-        .securityMatcher("/api/**")
+        .securityMatcher("/**")
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests((authorizeHttpRequests) ->
             authorizeHttpRequests
-                .requestMatchers("/media/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
         )
-        .addFilterBefore(new ApiKeyAuthenticationFilter(appProperties), UsernamePasswordAuthenticationFilter.class)
-        .formLogin(AbstractHttpConfigurer::disable)
-        .exceptionHandling(AbstractHttpConfigurer::disable);
-    return http.build();
-  }
-
-  @Bean
-  @Order(2)
-  public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable)
-        .cors(Customizer.withDefaults())
-        .securityMatcher("/api/v1/user/**")
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests((authorizeHttpRequests) ->
-            authorizeHttpRequests
-                .anyRequest().authenticated()
-        )
-        .addFilterBefore(new JwtAuthenticationFilter(new JwtService(appProperties)), UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .formLogin(AbstractHttpConfigurer::disable)
         .exceptionHandling(AbstractHttpConfigurer::disable);
     return http.build();

@@ -36,3 +36,5 @@ build/
 .env
 
 LOCAL.md
+
+/private

@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.Objects;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -17,9 +15,6 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.magnus.fileserver.utils.FileUtils;
 import com.magnus.fileserver.utils.RandomStringGenerator;
 import org.imgscalr.Scalr;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -27,28 +22,11 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
-@Service
-public class FileStorageService {
-
-  private final Path fileStorageLocation;
-
-  @Autowired
-  public FileStorageService(Environment env) {
-    this.fileStorageLocation = Paths.get(Objects.requireNonNull(env.getProperty("app.upload-dir")))
-        .toAbsolutePath().normalize();
-
-    try {
-      Files.createDirectories(this.fileStorageLocation);
-    } catch (Exception ex) {
-      throw new RuntimeException(
-          "Could not create the directory where the uploaded files will be stored.", ex);
-    }
-  }
-
-  public String storeFile(MultipartFile file) {
+public class ImageStorageUtils {
+  public static String storeImage(MultipartFile file, Path path) {
     try {
 
-      Scalr.Rotation rotation = this.getImageRotation(file);
+      Scalr.Rotation rotation = getImageRotation(file);
 
       BufferedImage inputImage = ImageIO.read(file.getInputStream());
 
@@ -76,10 +54,10 @@ public class FileStorageService {
             "Sorry! Filename contains invalid path sequence " + fileName);
       }
 
-      this.uploadImage(extraSmallImage, extraSmallFileName);
-      this.uploadImage(smallImage, smallFileName);
-      this.uploadImage(mediumImage, fileName);
-      this.uploadImage(largeImage, largeImageFileName);
+      uploadImage(extraSmallImage, path, extraSmallFileName);
+      uploadImage(smallImage, path, smallFileName);
+      uploadImage(mediumImage, path, fileName);
+      uploadImage(largeImage, path, largeImageFileName);
 
       return fileName;
     } catch (IOException ex) {
@@ -89,12 +67,12 @@ public class FileStorageService {
     }
   }
 
-  private void uploadImage(BufferedImage inputImage, String fileName) throws IOException {
+  public static void uploadImage(BufferedImage inputImage, Path path, String fileName) throws IOException {
 
     Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(FileUtils.getFileExtension(fileName));
     ImageWriter writer = writers.next();
 
-    Path targetLocation = this.fileStorageLocation.resolve(fileName);
+    Path targetLocation = path.resolve(fileName);
     File outputFile = new File(targetLocation.toUri());
 
     ImageOutputStream outputStream = ImageIO.createImageOutputStream(outputFile);
@@ -110,7 +88,7 @@ public class FileStorageService {
     writer.dispose();
   }
 
-  private Scalr.Rotation getImageRotation(MultipartFile file) throws IOException, ImageProcessingException {
+  private static Scalr.Rotation getImageRotation(MultipartFile file) throws IOException, ImageProcessingException {
     Metadata metadata = ImageMetadataReader.readMetadata(file.getInputStream());
 
 
@@ -144,8 +122,8 @@ public class FileStorageService {
     }
   }
 
-  public void deleteFile(String fileName) throws IOException {
-    Path targetLocation = this.fileStorageLocation.resolve(fileName);
+  public static void deleteImage(String fileName, Path path) throws IOException {
+    Path targetLocation = path.resolve(fileName);
     Files.delete(targetLocation);
   }
 }

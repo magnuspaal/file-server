@@ -1,14 +1,18 @@
 package com.magnus.fileserver.auth;
 
 import com.magnus.fileserver.config.AppProperties;
+import com.magnus.fileserver.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -54,5 +58,27 @@ public class JwtService {
 
   private String getJwtSecret() {
     return appProperties.getJwtSecret();
+  }
+
+  public UsernamePasswordAuthenticationToken validateJWT(String jwt) {
+
+    if (this.isTokenValid(jwt)) {
+      Claims claims = this.extractAllClaims(jwt);
+
+      User user = new User(
+          claims.get("id", Long.class),
+          claims.get("first_name", String.class),
+          claims.get("last_name", String.class),
+          claims.getSubject(),
+          claims.get("username", String.class)
+      );
+
+      return new UsernamePasswordAuthenticationToken(
+          user,
+          null,
+          Collections.singleton((GrantedAuthority) () -> "USER")
+      );
+    }
+    return null;
   }
 }
