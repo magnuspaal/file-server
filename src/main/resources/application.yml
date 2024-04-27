@@ -5,6 +5,10 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 10MB
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
 app:
   api-key: ${API_KEY}
   upload-dir: ./media

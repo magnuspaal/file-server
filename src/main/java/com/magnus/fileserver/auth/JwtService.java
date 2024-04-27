@@ -2,6 +2,7 @@ package com.magnus.fileserver.auth;
 
 import com.magnus.fileserver.config.AppProperties;
 import com.magnus.fileserver.user.User;
+import com.magnus.fileserver.user.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -21,6 +22,7 @@ import java.util.function.Function;
 public class JwtService {
 
   private final AppProperties appProperties;
+  private final UserService userService;
 
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -72,6 +74,8 @@ public class JwtService {
           claims.getSubject(),
           claims.get("username", String.class)
       );
+
+      userService.updateOrCreateUser(user);
 
       return new UsernamePasswordAuthenticationToken(
           user,

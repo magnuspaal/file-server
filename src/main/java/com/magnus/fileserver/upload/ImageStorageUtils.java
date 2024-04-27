@@ -95,7 +95,7 @@ public class ImageStorageUtils {
     int orientation;
 
     try {
-      ExifIFD0Directory exifIFD0 = metadata.getDirectory(ExifIFD0Directory.class);
+      ExifIFD0Directory exifIFD0 = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
       if (exifIFD0 != null) {
         orientation = exifIFD0.getInt(ExifIFD0Directory.TAG_ORIENTATION);
       } else {

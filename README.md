@@ -6,6 +6,9 @@ API_KEY=
 MEDIA_MAPPING=
 ALLOWED_ORIGINS=http://localhost:3000
 JWT_SECRET=
+DB_USERNAME=
+DB_PASSWORD=
+DB_URL=
 ```
 
 #### Release

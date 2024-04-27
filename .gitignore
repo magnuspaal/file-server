@@ -31,10 +31,9 @@ build/
 ### VS Code ###
 .vscode/
 
+###
 /media
-
 .env
-
 LOCAL.md
-
 /private
+liquibase.properties

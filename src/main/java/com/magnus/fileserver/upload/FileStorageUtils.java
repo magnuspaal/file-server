@@ -1,13 +1,11 @@
 package com.magnus.fileserver.upload;
 
-import com.magnus.fileserver.user.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Base64;
 
 public class FileStorageUtils {
@@ -26,13 +24,6 @@ public class FileStorageUtils {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  public static boolean fileBelongsToUser(User user, String filename) {
-    String filenameWithoutFormat = filename.split("\\.")[0];
-    String users = filenameWithoutFormat.split("_")[1];
-    String[] userList = users.split("-");
-    return Arrays.asList(userList).contains(user.getId().toString());
   }
 
   public static byte[] getFile(Path path, String filename) {
